@@ -22,6 +22,8 @@ class Node
     # and removes self from list.
     @prev.next = @next if @prev
     @next.prev = @prev if @next
+    @next = nil
+    @prev = nil
   end
 end
 
@@ -40,11 +42,11 @@ class LinkedList
   end
 
   def first
-    @head# ? @head.val : nil
+    @head
   end
 
   def last
-    @tail# ? @tail.val : nil
+    @tail
   end
 
   def empty?
@@ -66,23 +68,22 @@ class LinkedList
     else
       append(key,val)
     end
+
   end
   alias_method :[]=, :set
 
+  def delete(node)
+    raise "#{node} must be a node" unless node.is_a?(Node)
+    @head = @head.next if node == @head
+    @tail = @tail.prev if node == @tail
+
+    node.remove
+    node
+  end
+
   def remove(key)
-    # need to update @head / @tail if that's the one we removed
     removed = self[key]
-    if removed
-      removed.remove 
-
-      if removed == @head
-        @head = @head.next
-      end
-
-      if removed == @tail
-        @tail = @tail.prev
-      end
-    end
+    delete(removed) if removed
   end
 
   def each
@@ -90,40 +91,32 @@ class LinkedList
     return if @head.nil?
 
     yield @head 
-    # prc.call(@head)
+
     current_node = @head.next
     until current_node.nil?
       yield current_node
       current_node = current_node.next
     end
   end
-  # uncomment when you have `each` working and `Enumerable` included
+  
   def to_s
     inject([]) { |acc, node| acc << "[#{node.key}, #{node.val}]" }.join(", ")
   end
 
-  private
+private
   def append(key, val)
     new_node = Node.new(key, val)
     if @head == nil
-      @head = new_node
-      @tail = new_node
-      # new_node.next = @tail
+      @head = @tail = new_node
     else
-      old_tail = @tail
-      @tail = new_node
-      old_tail.next = @tail
-      @tail.prev = old_tail
+      old_tail, @tail = @tail, new_node
+      old_tail.next, @tail.prev = @tail, old_tail
     end
+    new_node
   end
-
+  
   def update(key, val)
-    self[key].val = val
+    node, node.val = self[key], val
+    node
   end
 end
-
-
-# Node
-# (key,val)
-# @next
-# @prev

@@ -16,9 +16,9 @@ class HashMap
   end
 
   def set(key, val)
-    resize! if @count == @store.length
     @count += 1 unless self.include?(key)
     bucket(key).set(key, val)
+    resize! if @count == @store.length
   end
 
   def get(key)
